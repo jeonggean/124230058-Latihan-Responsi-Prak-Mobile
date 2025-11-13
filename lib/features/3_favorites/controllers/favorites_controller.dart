@@ -1,14 +1,15 @@
+import 'package:eventfinder/features/1_animes/models/anime_model.dart';
 import 'package:flutter/foundation.dart';
-import '../../1_animes/models/event_model.dart';
+import '../../../core/services/api_service.dart';
 import '../services/favorites_service.dart';
 
 class FavoritesController extends ChangeNotifier {
   final FavoritesService _service = FavoritesService();
 
-  List<EventModel> _favorites = [];
+  List<AnimeModel> _favorites = [];
   bool _isLoading = false;
 
-  List<EventModel> get favorites => _favorites;
+  List<AnimeModel> get favorites => _favorites;
   bool get isLoading => _isLoading;
 
   void loadFavorites() {
@@ -20,7 +21,7 @@ class FavoritesController extends ChangeNotifier {
       _favorites = _service.getFavorites();
       print('DEBUG CONTROLLER: Loaded ${_favorites.length} favorites');
       for (var fav in _favorites) {
-        print('DEBUG CONTROLLER: - ${fav.name}');
+        print('DEBUG CONTROLLER: - ${fav.title}');
       }
     } catch (e) {
       print('DEBUG CONTROLLER: Error loading favorites: $e');

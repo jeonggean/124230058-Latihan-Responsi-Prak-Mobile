@@ -2,7 +2,7 @@ import 'package:eventfinder/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../1_animes/screens/anime_list_screen.dart';
 import '../3_favorites/screens/favorites_screen.dart';
-import '../5_profile/screens/profile_screen.dart';
+import '../4_profile/screens/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   MainNavigationScreen({super.key});
@@ -21,7 +21,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   }
 
   final List<Widget> _screens = [
-    EventListScreen(),
+    AnimeListScreen(),
     FavoritesScreen(
       key: ValueKey('favorites_${DateTime.now().millisecondsSinceEpoch}'),
     ),

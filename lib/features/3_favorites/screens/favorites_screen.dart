@@ -1,8 +1,7 @@
 import 'package:eventfinder/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import '../../1_animes/models/event_model.dart';
+import '../../1_animes/models/anime_model.dart';
 import '../../1_animes/screens/anime_detail_screen.dart';
 import '../controllers/favorites_controller.dart';
 
@@ -32,18 +31,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     _controller.dispose();
     super.dispose();
   }
-
-  String _formatCurrency(double price, String currencyCode) {
-    if (price == 0.0 && currencyCode == 'N/A') return "N/A";
-    if (price == 0.0) return "Gratis";
-    final format = NumberFormat.currency(
-      locale: 'en_US',
-      symbol: "$currencyCode ",
-      decimalDigits: 2,
-    );
-    return format.format(price);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,19 +65,19 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       itemCount: _controller.favorites.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final EventModel event = _controller.favorites[index];
+        final AnimeModel event = _controller.favorites[index];
         return _buildEventCard(event);
       },
     );
   }
 
-  Widget _buildEventCard(EventModel event) {
+  Widget _buildEventCard(AnimeModel anime) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EventDetailScreen(event: event),
+            builder: (context) => AnimeDetailScreen(anime: anime),
           ),
         ).then((_) {
           _controller.loadFavorites();
@@ -107,7 +94,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: Image.network(
-                event.imageUrl,
+                anime.imageUrl,
                 height: 80,
                 width: 80,
                 fit: BoxFit.cover,
@@ -129,7 +116,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    event.name,
+                    anime.title,
                     style: GoogleFonts.nunito(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
@@ -137,36 +124,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today,
-                          size: 14, color: AppColors.kSecondaryTextColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        "${event.localDate} @ ${event.localTime}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.kSecondaryTextColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.attach_money,
-                          size: 14, color: AppColors.kSecondaryTextColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        _formatCurrency(event.minPrice, event.currency),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.kSecondaryTextColor,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

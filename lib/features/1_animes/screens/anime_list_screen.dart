@@ -1,92 +1,36 @@
 import 'package:eventfinder/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import '../controllers/animes_controller.dart';
-import '../models/event_model.dart';
-import 'anime_detail_screen.dart';
+import '../controllers/anime_controller.dart';
+import '../models/anime_model.dart';
+import 'anime_detail_screen.dart'; 
 
-class EventListScreen extends StatefulWidget {
-  EventListScreen({super.key});
+class AnimeListScreen extends StatefulWidget {
+  AnimeListScreen({super.key});
 
   @override
-  State<EventListScreen> createState() => _EventListScreenState();
+  State<AnimeListScreen> createState() => _AnimeListScreenState();
 }
 
-class _EventListScreenState extends State<EventListScreen>
-    with SingleTickerProviderStateMixin {
-  late final EventController _controller;
+class _AnimeListScreenState extends State<AnimeListScreen> {
+  late final AnimeController _controller;
   final TextEditingController _searchController = TextEditingController();
-  late TabController _tabController;
-
-  final LocationService _locationService = LocationService();
-  String? _currentLocationName;
-  bool _isLocationLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _controller = EventController();
+    _controller = AnimeController();
     _controller.addListener(() {
       if (mounted) setState(() {});
     });
-
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(_handleTabSelection);
-
-    _fetchLocationName();
-  }
-
-  Future<void> _fetchLocationName() async {
-    setState(() {
-      _isLocationLoading = true;
-    });
-    try {
-      final cityName = await _locationService.getCityName();
-      if (mounted) {
-        setState(() {
-          _currentLocationName = cityName ?? "Lokasi Tidak Ditemukan";
-          _isLocationLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _currentLocationName = "Gagal Mendeteksi Lokasi";
-          _isLocationLoading = false;
-        });
-      }
-    }
-  }
-
-  void _handleTabSelection() {
-    if (!_tabController.indexIsChanging) {
-      _controller.changeMode(
-        _tabController.index == 0
-            ? EventListMode.nearby
-            : EventListMode.popular,
-      );
-    }
+    _controller.fetchTopAnime();
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabSelection);
-    _tabController.dispose();
     _controller.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  String _formatCurrency(double price, String currencyCode) {
-    if (price == 0.0 && currencyCode == 'N/A') return "N/A";
-    if (price == 0.0) return "Gratis";
-    final format = NumberFormat.currency(
-      locale: 'en_US',
-      symbol: "$currencyCode ",
-      decimalDigits: 2,
-    );
-    return format.format(price);
   }
 
   @override
@@ -96,17 +40,9 @@ class _EventListScreenState extends State<EventListScreen>
         child: Column(
           children: [
             _buildCustomAppBar(),
-            _buildLocationSelector(),
             _buildSearchBar(),
-            _buildTabBar(),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildEventList(_controller.eventsToShow),
-                  _buildEventList(_controller.eventsToShow),
-                ],
-              ),
+              child: _buildAnimeList(_controller.animesToShow),
             ),
           ],
         ),
@@ -124,7 +60,7 @@ class _EventListScreenState extends State<EventListScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Halo, User!',
+                'Halo, User!', //belum diganti
                 style: GoogleFonts.nunito(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -132,7 +68,7 @@ class _EventListScreenState extends State<EventListScreen>
                 ),
               ),
               Text(
-                'Temukan acara favoritmu',
+                'Temukan anime favoritmu', 
                 style: GoogleFonts.nunito(
                   fontSize: 16,
                   color: AppColors.kSecondaryTextColor,
@@ -143,42 +79,10 @@ class _EventListScreenState extends State<EventListScreen>
           CircleAvatar(
             backgroundColor: Theme.of(context).cardColor,
             child: Icon(
-              Icons.notifications_outlined,
+              Icons.person_outline,
               color: AppColors.kSecondaryTextColor,
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationSelector() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 0.0),
-      child: Row(
-        children: [
-          Icon(Icons.location_on_outlined,
-              color: AppColors.kSecondaryTextColor, size: 20),
-          const SizedBox(width: 8),
-          _isLocationLoading
-              ? Text(
-                  'Mencari lokasi...',
-                  style: GoogleFonts.nunito(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.kSecondaryTextColor,
-                  ),
-                )
-              : Text(
-                  _currentLocationName ?? 'Lokasi Tidak Ditemukan',
-                  style: GoogleFonts.nunito(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.kTextColor,
-                  ),
-                ),
-          Icon(Icons.arrow_drop_down,
-              color: AppColors.kSecondaryTextColor, size: 24),
         ],
       ),
     );
@@ -191,7 +95,7 @@ class _EventListScreenState extends State<EventListScreen>
         controller: _searchController,
         style: TextStyle(color: AppColors.kTextColor),
         decoration: InputDecoration(
-          hintText: 'Cari acara...',
+          hintText: 'Cari anime...',
           hintStyle: TextStyle(color: AppColors.kSecondaryTextColor),
           prefixIcon: Icon(Icons.search, color: AppColors.kSecondaryTextColor),
           suffixIcon: _searchController.text.isNotEmpty
@@ -199,13 +103,10 @@ class _EventListScreenState extends State<EventListScreen>
                   icon: Icon(Icons.clear, color: AppColors.kSecondaryTextColor),
                   onPressed: () {
                     _searchController.clear();
-                    _controller.searchEvents('');
+                    _controller.fetchTopAnime();
                   },
                 )
-              : IconButton(
-                  icon: Icon(Icons.tune, color: AppColors.kSecondaryTextColor),
-                  onPressed: () {},
-                ),
+              : null,
           filled: true,
           fillColor: Theme.of(context).cardColor,
           border: OutlineInputBorder(
@@ -216,56 +117,23 @@ class _EventListScreenState extends State<EventListScreen>
         ),
         onChanged: (value) => setState(() {}),
         onSubmitted: (String keyword) {
-          _controller.searchEvents(keyword);
+          _controller.searchAnime(keyword);
         },
       ),
     );
   }
 
-  Widget _buildTabBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-      child: TabBar(
-        controller: _tabController,
-        labelStyle: GoogleFonts.nunito(fontWeight: FontWeight.bold),
-        unselectedLabelStyle: GoogleFonts.nunito(),
-        labelColor: Colors.white,
-        unselectedLabelColor: AppColors.kSecondaryTextColor,
-        isScrollable: false,
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicator: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        dividerColor: Colors.transparent,
-        splashBorderRadius: BorderRadius.circular(15),
-        tabs: const [
-          Tab(text: 'Di Sekitarmu'),
-          Tab(text: 'Populer'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventList(List<EventModel> events) {
+  Widget _buildAnimeList(List<AnimeModel> animes) {
     if (_controller.isLoading) {
       return Center(
           child: CircularProgressIndicator(
               color: Theme.of(context).colorScheme.primary));
     }
 
-    if (_controller.errorMessage.isNotEmpty && events.isEmpty) {
-      String displayError = _controller.errorMessage;
-      if (displayError.contains('Izin lokasi ditolak')) {
-        displayError =
-            'Izin lokasi dibutuhkan untuk menampilkan acara di sekitarmu. Aktifkan di pengaturan HP.';
-      } else if (displayError.contains('Layanan lokasi tidak aktif')) {
-        displayError =
-            'Layanan lokasi (GPS) di HP-mu mati. Aktifkan untuk mencari acara di sekitar.';
-      } else if (displayError.contains('Gagal memuat data event')) {
-        displayError =
-            'Gagal mengambil data dari server. Cek koneksi internetmu.';
-      }
+    if (_controller.errorMessage.isNotEmpty && animes.isEmpty) {
+      String displayError = _controller.errorMessage.contains('Gagal memuat data')
+          ? 'Gagal mengambil data dari server. Cek koneksi internetmu.'
+          : 'Terjadi kesalahan.';
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -278,14 +146,10 @@ class _EventListScreenState extends State<EventListScreen>
       );
     }
 
-    if (events.isEmpty) {
-      String message = _controller.currentMode == EventListMode.nearby
-          ? 'Tidak ada acara ditemukan di sekitarmu.'
-          : 'Tidak ada acara populer ditemukan.';
-      if (_searchController.text.isNotEmpty) {
-        message =
-            'Tidak ada acara ditemukan untuk "${_searchController.text}".';
-      }
+    if (animes.isEmpty) {
+      String message = _searchController.text.isNotEmpty
+          ? 'Tidak ada anime ditemukan untuk "${_searchController.text}".'
+          : 'Tidak ada anime ditemukan.';
       return Center(
           child: Text(message,
               style:
@@ -294,24 +158,24 @@ class _EventListScreenState extends State<EventListScreen>
     }
 
     return ListView.separated(
-      key: PageStorageKey(_controller.currentMode),
+      key: PageStorageKey('anime_list'),
       padding: const EdgeInsets.all(24.0),
-      itemCount: events.length,
+      itemCount: animes.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final EventModel event = events[index];
-        return _buildEventCard(event);
+        final AnimeModel anime = animes[index];
+        return _buildAnimeCard(anime);
       },
     );
   }
 
-  Widget _buildEventCard(EventModel event) {
+  Widget _buildAnimeCard(AnimeModel anime) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => EventDetailScreen(event: event),
+            builder: (context) => AnimeDetailScreen(anime: anime),
           ),
         );
       },
@@ -326,7 +190,7 @@ class _EventListScreenState extends State<EventListScreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: Image.network(
-                event.imageUrl,
+                anime.imageUrl, // Data dari model anime
                 height: 80,
                 width: 80,
                 fit: BoxFit.cover,
@@ -348,7 +212,7 @@ class _EventListScreenState extends State<EventListScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    event.name,
+                    anime.title, // Data dari model anime [cite: 853]
                     style: GoogleFonts.nunito(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
@@ -360,26 +224,10 @@ class _EventListScreenState extends State<EventListScreen>
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today,
-                          size: 14, color: AppColors.kSecondaryTextColor),
+                      Icon(Icons.star, size: 14, color: Colors.amber),
                       const SizedBox(width: 6),
                       Text(
-                        "${event.localDate} @ ${event.localTime}",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.kSecondaryTextColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.attach_money,
-                          size: 14, color: AppColors.kSecondaryTextColor),
-                      const SizedBox(width: 6),
-                      Text(
-                        _formatCurrency(event.minPrice, event.currency),
+                        "Score: ${anime.score.toString()}",
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.kSecondaryTextColor,

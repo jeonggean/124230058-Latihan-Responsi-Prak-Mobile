@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../1_animes/models/event_model.dart';
+import '../../1_animes/models/anime_model.dart';
 import '../../2_auth/services/auth_service.dart';
 
 class FavoritesService {
@@ -28,7 +28,7 @@ class FavoritesService {
     return result;
   }
 
-  List<EventModel> getFavorites() {
+  List<AnimeModel> getFavorites() {
     final user = _getCurrentUser();
     final favListMap = _getUserFavorites(user);
 
@@ -36,11 +36,11 @@ class FavoritesService {
     print('DEBUG FAVORITES: Found ${favListMap.length} favorites');
 
     return favListMap
-        .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
+        .map((json) => AnimeModel.fromJson(json as Map<String, dynamic>))
         .toList();
   }
 
-  Future<void> addFavorite(EventModel event) async {
+  Future<void> addFavorite(AnimeModel event) async {
     final user = _getCurrentUser();
     print('DEBUG FAVORITES: Current user: $user');
 
@@ -61,23 +61,23 @@ class FavoritesService {
       'DEBUG FAVORITES: Verification - data in Hive: ${verify?.length ?? 0} items',
     );
 
-    print('DEBUG FAVORITES: Added ${event.name} for user $user');
+    print('DEBUG FAVORITES: Added ${event.title} for user $user');
     print('DEBUG FAVORITES: Total favorites now: ${favList.length}');
   }
 
-  Future<void> removeFavorite(EventModel event) async {
+  Future<void> removeFavorite(AnimeModel event) async {
     final user = _getCurrentUser();
     final favList = _getUserFavorites(user);
 
-    favList.removeWhere((item) => item['id'] == event.id);
+    favList.removeWhere((item) => item['id'] == event.malId);
     await _favoritesBox.put(user, favList);
   }
 
-  bool isFavorite(EventModel event) {
+  bool isFavorite(AnimeModel event) {
     try {
       final user = _getCurrentUser();
       final favList = _getUserFavorites(user);
-      return favList.any((item) => item['id'] == event.id);
+      return favList.any((item) => item['id'] == event.malId);
     } catch (e) {
       return false;
     }

@@ -1,13 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:bcrypt/bcrypt.dart';
 
 class AuthService {
   final Box _usersBox = Hive.box('users');
   final Box _sessionBox = Hive.box('session');
-
-  String _hashPassword(String password) {
-    return BCrypt.hashpw(password, BCrypt.gensalt());
-  }
 
   Future<bool> register(String username, String password) async {
     if (username.isEmpty || password.isEmpty) {
@@ -18,8 +13,7 @@ class AuthService {
       throw Exception("Username sudah terpakai");
     }
 
-    final hashedPassword = _hashPassword(password);
-    await _usersBox.put(username, hashedPassword);
+    await _usersBox.put(username, password);
     return true;
   }
 
@@ -28,9 +22,9 @@ class AuthService {
       throw Exception("Username tidak ditemukan");
     }
 
-    final String storedHash = _usersBox.get(username);
+    final String storedPassword = _usersBox.get(username);
 
-    if (BCrypt.checkpw(password, storedHash)) {
+     if (password == storedPassword) {
       await _sessionBox.put("currentUser", username);
       return true;
     } else {

@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'features/0_navigation/main_navigation_screen.dart';
 import 'features/2_auth/services/auth_service.dart';
 import 'features/2_auth/screens/login_screen.dart';
-import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +15,6 @@ void main() async {
   await Hive.openBox('session');
   await Hive.openBox('users');
   await Hive.openBox('favorites');
-
-  tz.initializeTimeZones();
-
   runApp(const MyApp());
 }
 

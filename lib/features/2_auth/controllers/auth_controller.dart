@@ -9,7 +9,7 @@ class AuthController extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
-  // Allow external callers to set an error (or info) message and notify listeners.
+
   set errorMessage(String message) {
     _errorMessage = message;
     notifyListeners();
