@@ -1,4 +1,4 @@
-import 'package:eventfinder/core/utils/app_colors.dart';
+import '/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../3_favorites/services/favorites_service.dart';
@@ -15,178 +15,146 @@ class AnimeDetailScreen extends StatefulWidget {
 
 class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
   final FavoritesService _favoritesService = FavoritesService();
+  late bool _isFavorite = false;
 
-  late bool _isFavorite;
   @override
   void initState() {
     super.initState();
-    _isFavorite = _favoritesService.isFavorite(widget.anime);
+    _checkFavoriteStatus();
+  }
+
+  void _checkFavoriteStatus() async {
+    _isFavorite = await _favoritesService.isFavorite(widget.anime);
+    if (mounted) setState(() {});
   }
 
   void _toggleFavorite() async {
-    try {
-      if (_isFavorite) {
-        await _favoritesService.removeFavorite(widget.anime);
-        setState(() {
-          _isFavorite = false;
-        });
-      } else {
-        await _favoritesService.addFavorite(widget.anime);
-        setState(() {
-          _isFavorite = true;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+    if (_isFavorite) {
+      await _favoritesService.removeFavorite(widget.anime);
+    } else {
+      await _favoritesService.addFavorite(widget.anime);
     }
+    if (mounted) setState(() => _isFavorite = !_isFavorite);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          _buildBackgroundImage(),
-          _buildNavigationButtons(),
-           _buildContentSheet(),
+          _buildPurpleHeader(),
+          Expanded(child: _buildContent()),
         ],
       ),
     );
   }
 
-  Widget _buildBackgroundImage() {
+  Widget _buildPurpleHeader() {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.45,
       width: double.infinity,
-      child: Image.network(
-        widget.anime.imageUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: Theme.of(context).cardColor,
-          child: const Icon(
-            Icons.broken_image,
-            size: 60,
-            color: AppColors.kSecondaryTextColor,
-          ),
+      height: 240,
+      decoration: BoxDecoration(
+        color: Colors.purple.shade400,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
       ),
-    );
-  }
-
-  Widget _buildNavigationButtons() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.4),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ),
-            CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.4),
-              child: IconButton(
-                icon: Icon(
-                  _isFavorite ? Icons.bookmark : Icons.bookmark_border_outlined,
-                  color: _isFavorite
-                      ? AppColors.kPrimaryColor
-                      : Colors.white,
-                ),
-                onPressed: _toggleFavorite,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
- Widget _buildContentSheet() {
-  return Container(
-    margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.4),
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
-    ),
-    child: SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.anime.title,
-            style: GoogleFonts.nunito(
-              fontWeight: FontWeight.bold,
-              fontSize: 26,
-              color: AppColors.kTextColor,
-            ),
-          ),
-
-          const SizedBox(height: 20),
-          _buildDetailItem(
-            icon: Icons.star,
-            title: "Score",
-            subtitle: widget.anime.score.toString(),
-          ),
-          const SizedBox(height: 20),
-          _buildDetailItem(
-            icon: Icons.description,
-            title: "Sinopsis",
-            subtitle: widget.anime.synopsis,
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-
-  Widget _buildDetailItem(
-      {required IconData icon,
-      required String title,
-      required String subtitle}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: Theme.of(context).cardColor,
-          child: Icon(icon, color: AppColors.kPrimaryColor, size: 20),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: GoogleFonts.nunito(
-                  fontSize: 16,
-                  color: AppColors.kSecondaryTextColor,
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: GoogleFonts.nunito(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.kTextColor,
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                child: IconButton(
+                  icon: Icon(
+                    _isFavorite ? Icons.bookmark : Icons.bookmark_border,
+                    color: Colors.purple.shade500,
+                  ),
+                  onPressed: _toggleFavorite,
                 ),
               ),
             ],
           ),
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          Transform.translate(
+            offset: const Offset(0, -80),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                widget.anime.imageUrl,
+                height: 250,
+                width: 180,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(height: -40),
+          Text(
+            widget.anime.title,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.nunito(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: AppColors.kTextColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "⭐ ${widget.anime.score}",
+            style: GoogleFonts.nunito(
+              fontSize: 17,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Synopsis",
+              style: GoogleFonts.nunito(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.kTextColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            widget.anime.synopsis.isEmpty
+                ? "No synopsis available."
+                : widget.anime.synopsis,
+            textAlign: TextAlign.justify,
+            style: GoogleFonts.nunito(
+              fontSize: 16,
+              height: 1.6,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
     );
   }
 }

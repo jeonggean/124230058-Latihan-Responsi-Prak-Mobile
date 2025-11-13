@@ -1,4 +1,4 @@
-import 'package:eventfinder/features/1_animes/models/anime_model.dart';
+import '../../1_animes/models/anime_model.dart';
 import 'package:flutter/foundation.dart';
 import '../services/favorites_service.dart';
 
@@ -20,13 +20,13 @@ class FavoritesController extends ChangeNotifier {
     }
   }
 
-  void loadFavorites() {
+  Future<void> loadFavorites() async {
     _isLoading = true;
     _notifyListenersIfNotDisposed();
 
     try {
       print('DEBUG CONTROLLER: Loading favorites...');
-      _favorites = _service.getFavorites();
+      _favorites = await _service.getFavorites();
       print('DEBUG CONTROLLER: Loaded ${_favorites.length} favorites');
       for (var fav in _favorites) {
         print('DEBUG CONTROLLER: - ${fav.title}');

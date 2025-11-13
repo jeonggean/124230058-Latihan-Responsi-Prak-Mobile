@@ -1,85 +1,75 @@
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../../1_animes/models/anime_model.dart';
 import '../../2_auth/services/auth_service.dart';
 
 class FavoritesService {
-  final Box _favoritesBox = Hive.box('favorites');
   final AuthService _authService = AuthService();
 
-  String _getCurrentUser() {
-    final user = _authService.getCurrentUser();
+  Future<String> _getCurrentUser() async {
+    final user = await _authService.getCurrentUser();
     if (user == null) {
       throw Exception("User tidak login");
     }
     return user;
   }
 
-  List<Map> _getUserFavorites(String username) {
-    final dynamicList = _favoritesBox.get(username) ?? [];
-    print(
-      'DEBUG FAVORITES SERVICE: Getting raw favorites for $username from Hive',
-    );
-    print('DEBUG FAVORITES SERVICE: Raw data type: ${dynamicList.runtimeType}');
-    print('DEBUG FAVORITES SERVICE: Raw data: $dynamicList');
-    final result = List<Map>.from(dynamicList);
-    print(
-      'DEBUG FAVORITES SERVICE: Converted to List<Map>, count: ${result.length}',
-    );
-    return result;
+  String _getFavoritesKey(String username) {
+    return 'favorites_$username';
   }
 
-  List<AnimeModel> getFavorites() {
-    final user = _getCurrentUser();
-    final favListMap = _getUserFavorites(user);
+  Future<List<String>> _getUserFavoritesList() async {
+    final username = await _getCurrentUser();
+    final prefs = await SharedPreferences.getInstance();
 
-    print('DEBUG FAVORITES: Getting favorites for user $user');
-    print('DEBUG FAVORITES: Found ${favListMap.length} favorites');
-
-    return favListMap
-        .map((json) => AnimeModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return prefs.getStringList(_getFavoritesKey(username)) ?? [];
   }
 
-  Future<void> addFavorite(AnimeModel event) async {
-    final user = _getCurrentUser();
-    print('DEBUG FAVORITES: Current user: $user');
-
-    final favList = _getUserFavorites(user);
-    print(
-      'DEBUG FAVORITES: Current favorites count before add: ${favList.length}',
-    );
-
-    favList.add(event.toJson());
-    print('DEBUG FAVORITES: Favorites count after add: ${favList.length}');
-
-    await _favoritesBox.put(user, favList);
-    print('DEBUG FAVORITES: Saved to Hive for user: $user');
-
-    // Verify saved data
-    final verify = _favoritesBox.get(user);
-    print(
-      'DEBUG FAVORITES: Verification - data in Hive: ${verify?.length ?? 0} items',
-    );
-
-    print('DEBUG FAVORITES: Added ${event.title} for user $user');
-    print('DEBUG FAVORITES: Total favorites now: ${favList.length}');
+  Future<List<AnimeModel>> getFavorites() async {
+    final List<String> jsonStringList = await _getUserFavoritesList();
+    return jsonStringList.map((jsonString) {
+      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      return AnimeModel.fromJson(jsonMap);
+    }).toList();
   }
 
-  Future<void> removeFavorite(AnimeModel event) async {
-    final user = _getCurrentUser();
-    final favList = _getUserFavorites(user);
+  Future<void> addFavorite(AnimeModel anime) async {
+    final username = await _getCurrentUser();
+    final prefs = await SharedPreferences.getInstance();
+    final String key = _getFavoritesKey(username);
 
-    favList.removeWhere((item) => item['id'] == event.malId);
-    await _favoritesBox.put(user, favList);
-  }
+    final List<String> favoritesList = prefs.getStringList(key) ?? [];
 
-  bool isFavorite(AnimeModel event) {
-    try {
-      final user = _getCurrentUser();
-      final favList = _getUserFavorites(user);
-      return favList.any((item) => item['id'] == event.malId);
-    } catch (e) {
-      return false;
+    final String animeString = jsonEncode(anime.toJson());
+
+    if (!favoritesList.any(
+      (item) => jsonDecode(item)['malId'] == anime.malId,
+    )) {
+      favoritesList.add(animeString);
+      await prefs.setStringList(key, favoritesList);
     }
+  }
+
+  Future<void> removeFavorite(AnimeModel anime) async {
+    final username = await _getCurrentUser();
+    final prefs = await SharedPreferences.getInstance();
+    final String key = _getFavoritesKey(username);
+
+    List<String> favoritesList = prefs.getStringList(key) ?? [];
+
+    favoritesList.removeWhere((jsonString) {
+      final Map<String, dynamic> animeMap = jsonDecode(jsonString);
+      return animeMap['malId'] == anime.malId;
+    });
+    await prefs.setStringList(key, favoritesList);
+  }
+
+  Future<bool> isFavorite(AnimeModel anime) async {
+    final List<String> favoritesList = await _getUserFavoritesList();
+
+    return favoritesList.any((jsonString) {
+      final Map<String, dynamic> animeMap = jsonDecode(jsonString);
+      return animeMap['malId'] == anime.malId;
+    });
   }
 }

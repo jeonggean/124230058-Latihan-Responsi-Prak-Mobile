@@ -1,4 +1,4 @@
-import 'package:eventfinder/core/utils/app_colors.dart';
+import '../../core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,9 +12,7 @@ void main() async {
 
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
-  await Hive.openBox('session');
   await Hive.openBox('users');
-  await Hive.openBox('favorites');
   runApp(const MyApp());
 }
 
@@ -24,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Event Finder (MVC)',
+      title: 'MyAnime Archive',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light().copyWith(
         scaffoldBackgroundColor: AppColors.kBackgroundColor,
@@ -95,8 +93,10 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _checkLoginStatus() async {
     await Future.delayed(const Duration(seconds: 1));
 
+    final bool isLoggedIn = await _authService.isLoggedIn();
+
     if (mounted) {
-      if (_authService.isLoggedIn()) {
+      if (isLoggedIn) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MainNavigationScreen()),

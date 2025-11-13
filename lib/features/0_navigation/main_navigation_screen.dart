@@ -69,8 +69,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_border_outlined),
-              activeIcon: Icon(Icons.bookmark),
+              icon: Icon(Icons.favorite),
+              activeIcon: Icon(Icons.favorite),
               label: 'Favorites',
             ),
             BottomNavigationBarItem(

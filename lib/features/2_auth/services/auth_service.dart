@@ -1,8 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final Box _usersBox = Hive.box('users');
-  final Box _sessionBox = Hive.box('session');
 
   Future<bool> register(String username, String password) async {
     if (username.isEmpty || password.isEmpty) {
@@ -24,8 +24,9 @@ class AuthService {
 
     final String storedPassword = _usersBox.get(username);
 
-     if (password == storedPassword) {
-      await _sessionBox.put("currentUser", username);
+    if (password == storedPassword) {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("currentUser", username);
       return true;
     } else {
       throw Exception("Password salah");
@@ -33,14 +34,17 @@ class AuthService {
   }
 
   Future<void> logout() async {
-    await _sessionBox.delete("currentUser");
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove("currentUser");
   }
 
-  String? getCurrentUser() {
-    return _sessionBox.get("currentUser");
+  Future<String?> getCurrentUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("currentUser");
   }
 
-  bool isLoggedIn() {
-    return _sessionBox.containsKey("currentUser");
+  Future<bool> isLoggedIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey("currentUser");
   }
 }

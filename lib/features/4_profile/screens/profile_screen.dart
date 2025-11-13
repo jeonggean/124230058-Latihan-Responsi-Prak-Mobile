@@ -1,4 +1,4 @@
-import 'package:eventfinder/core/utils/app_colors.dart';
+import '../../../core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../2_auth/services/auth_service.dart';
@@ -19,7 +19,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _username = _authService.getCurrentUser();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final username = await _authService.getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _username = username;
+      });
+    }
   }
 
   Future<void> _logout() async {
@@ -57,15 +66,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             CircleAvatar(
               radius: 50,
               backgroundColor: Theme.of(context).cardColor,
-              child: Icon(
-                Icons.person_outline,
-                size: 60,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              backgroundImage: NetworkImage(
+                  'https://placehold.co/150x150/EFEFEF/333333?text=Foto'),
             ),
             const SizedBox(height: 16),
             Text(
-              _username ?? 'Pengguna',
+              'Gwejh',
               textAlign: TextAlign.center,
               style: GoogleFonts.nunito(
                 fontSize: 26,
@@ -73,12 +79,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: AppColors.kTextColor,
               ),
             ),
+            const SizedBox(height: 4),
             Text(
-              'Selamat datang kembali!',
+              '123220000',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.nunito(
+                fontSize: 18,
+                color: AppColors.kSecondaryTextColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Logged in as: ${_username ?? 'Loading...'}',
               textAlign: TextAlign.center,
               style: GoogleFonts.nunito(
                 fontSize: 16,
                 color: AppColors.kSecondaryTextColor,
+                fontStyle: FontStyle.italic,
               ),
             ),
             const Spacer(flex: 2),

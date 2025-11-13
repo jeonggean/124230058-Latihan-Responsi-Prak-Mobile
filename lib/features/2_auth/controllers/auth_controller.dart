@@ -24,7 +24,9 @@ class AuthController extends ChangeNotifier {
     _notifyListenersIfNotDisposed();
   }
 
-  bool get isLoggedIn => _service.isLoggedIn();
+  Future<bool> isLoggedIn() async {
+    return await _service.isLoggedIn();
+  }
 
   Future<bool> login(String username, String password) async {
     _isLoading = true;
