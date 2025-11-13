@@ -1,6 +1,5 @@
 import 'package:eventfinder/features/1_animes/models/anime_model.dart';
 import 'package:flutter/foundation.dart';
-import '../../../core/services/api_service.dart';
 import '../services/favorites_service.dart';
 
 class FavoritesController extends ChangeNotifier {
@@ -12,9 +11,18 @@ class FavoritesController extends ChangeNotifier {
   List<AnimeModel> get favorites => _favorites;
   bool get isLoading => _isLoading;
 
+  void _notifyListenersIfNotDisposed() {
+    if (!hasListeners) return;
+    try {
+      notifyListeners();
+    } catch (e) {
+      // Controller is disposed, ignore
+    }
+  }
+
   void loadFavorites() {
     _isLoading = true;
-    notifyListeners();
+    _notifyListenersIfNotDisposed();
 
     try {
       print('DEBUG CONTROLLER: Loading favorites...');
@@ -29,6 +37,6 @@ class FavoritesController extends ChangeNotifier {
     }
 
     _isLoading = false;
-    notifyListeners();
+    _notifyListenersIfNotDisposed();
   }
 }

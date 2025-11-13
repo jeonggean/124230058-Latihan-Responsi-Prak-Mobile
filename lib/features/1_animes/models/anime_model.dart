@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class AnimeModel {
   final int malId;
   final String title;
@@ -15,29 +13,23 @@ class AnimeModel {
     required this.synopsis,
   });
 
-  // buat nyimpen di SharedPreferences (Favorit)
-  Map<String, dynamic> toJson() {
-    return {
-      'malId': malId,
-      'title': title,
-      'imageUrl': imageUrl,
-      'score': score,
-      'synopsis': synopsis,
-    };
-  }
-
   factory AnimeModel.fromJson(Map<String, dynamic> json) {
     return AnimeModel(
-      malId: json['malId']?? "-",
-      title: json['title']?? "-",
-      imageUrl: json['imageUrl'],
-      score: (json['score'] as num).toDouble(),
-      synopsis: json['synopsis']?? "-",
+      malId: json['mal_id'] ?? 0,
+      title: json['title'] ?? "-",
+      imageUrl: json['images']['jpg']['image_url'] ?? "",
+      score: (json['score'] ?? 0).toDouble(),
+      synopsis: json['synopsis'] ?? "-",
     );
   }
 
-  String toJsonString() => json.encode(toJson());
-  factory AnimeModel.fromJsonString(String jsonString) {
-    return AnimeModel.fromJson(json.decode(jsonString));
+  Map<String, dynamic> toJson() {
+    return {
+      'mal_id': malId,
+      'title': title,
+      'image_url': imageUrl,
+      'score': score,
+      'synopsis': synopsis,
+    };
   }
 }

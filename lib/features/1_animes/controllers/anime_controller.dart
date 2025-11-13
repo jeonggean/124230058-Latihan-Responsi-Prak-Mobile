@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/anime_model.dart';
-import '../../../core/services/api_service.dart'; 
+import '../service/anime_service.dart'; 
 
 //buat nampilinnya mau yang top atau yang search
 enum AnimeListMode { top, search }
@@ -26,12 +26,21 @@ class AnimeController with ChangeNotifier {
 
   void _setLoading(bool loading) {
     _isLoading = loading;
-    notifyListeners();
+    _notifyListenersIfNotDisposed();
   }
 
   void _setError(String message) {
     _errorMessage = message;
     _setLoading(false);
+  }
+
+  void _notifyListenersIfNotDisposed() {
+    if (!hasListeners) return;
+    try {
+      notifyListeners();
+    } catch (e) {
+      // Controller is disposed, ignore
+    }
   }
 
   Future<void> fetchTopAnime() async {

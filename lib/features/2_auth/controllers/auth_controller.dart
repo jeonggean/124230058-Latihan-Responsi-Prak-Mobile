@@ -10,9 +10,18 @@ class AuthController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
+  void _notifyListenersIfNotDisposed() {
+    if (!hasListeners) return;
+    try {
+      notifyListeners();
+    } catch (e) {
+      // Controller is disposed, ignore
+    }
+  }
+
   set errorMessage(String message) {
     _errorMessage = message;
-    notifyListeners();
+    _notifyListenersIfNotDisposed();
   }
 
   bool get isLoggedIn => _service.isLoggedIn();
@@ -20,7 +29,7 @@ class AuthController extends ChangeNotifier {
   Future<bool> login(String username, String password) async {
     _isLoading = true;
     _errorMessage = '';
-    notifyListeners();
+    _notifyListenersIfNotDisposed();
 
     try {
       await _service.login(username, password);
@@ -30,14 +39,14 @@ class AuthController extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _notifyListenersIfNotDisposed();
     }
   }
 
   Future<bool> register(String username, String password) async {
     _isLoading = true;
     _errorMessage = '';
-    notifyListeners();
+    _notifyListenersIfNotDisposed();
 
     try {
       await _service.register(username, password);
@@ -48,7 +57,7 @@ class AuthController extends ChangeNotifier {
       return false;
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _notifyListenersIfNotDisposed();
     }
   }
 }

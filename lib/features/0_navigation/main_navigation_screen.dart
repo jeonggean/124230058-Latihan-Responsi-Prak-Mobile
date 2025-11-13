@@ -20,18 +20,19 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     });
   }
 
-  final List<Widget> _screens = [
-    AnimeListScreen(),
-    FavoritesScreen(
-      key: ValueKey('favorites_${DateTime.now().millisecondsSinceEpoch}'),
-    ),
-    const ProfileScreen(),
-  ];
+  // Build screens dynamically to avoid disposed controller issues
+  List<Widget> _buildScreens() {
+    return [
+      AnimeListScreen(key: ValueKey('anime_list_${_selectedIndex == 0}')),
+      FavoritesScreen(key: ValueKey('favorites_${_selectedIndex == 1}')),
+      const ProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: _buildScreens()[_selectedIndex],
       bottomNavigationBar: _buildFloatingNavBar(),
     );
   }
