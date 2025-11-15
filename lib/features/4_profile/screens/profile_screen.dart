@@ -61,7 +61,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            // Header profile
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -102,10 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // Content
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -116,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: ListTile(
-                      leading: const Icon(Icons.cake, color: Colors.blue),
+                      leading: const Icon(Icons.person, color: AppColors.kPrimaryColor),
                       title: Text(
                         'Logged In As',
                         style: GoogleFonts.nunito(
@@ -126,13 +122,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       subtitle: Text(
                         _username ?? 'Loading...',
-                        style: GoogleFonts.nunito(fontSize: 14),
+                        style: GoogleFonts.nunito(
+                          fontSize: 14),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   ElevatedButton.icon(
                     icon: const Icon(Icons.logout),
                     label: Text(
@@ -152,8 +147,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 25),
                 ],
               ),
             ),
