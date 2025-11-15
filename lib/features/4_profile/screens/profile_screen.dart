@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../2_auth/services/auth_service.dart';
 import '../../2_auth/screens/login_screen.dart';
-import 'about_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -42,79 +41,122 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  void _goToAboutScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AboutScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue.shade50,
       appBar: AppBar(
         title: Text(
           'Profil Saya',
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        backgroundColor: AppColors.kPrimaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Spacer(flex: 1),
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Theme.of(context).cardColor,
-              backgroundImage: NetworkImage(
-                  'https://placehold.co/150x150/EFEFEF/333333?text=Foto'),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Gwejh',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: AppColors.kTextColor,
+          children: <Widget>[
+            // Header profile
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.kPrimaryColor,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.white,
+                    backgroundImage: AssetImage('assets/najwa.jpg'),
+                  ),
+                  const SizedBox(height: 15),
+
+                  Text(
+                    'Najwa Egi Fitriyani',
+                    style: GoogleFonts.nunito(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
+                  Text(
+                    '124230058',
+                    style: GoogleFonts.nunito(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '123220000',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                fontSize: 18,
-                color: AppColors.kSecondaryTextColor,
+
+            const SizedBox(height: 20),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: <Widget>[
+                  Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: ListTile(
+                      leading: const Icon(Icons.cake, color: Colors.blue),
+                      title: Text(
+                        'Logged In As',
+                        style: GoogleFonts.nunito(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        _username ?? 'Loading...',
+                        style: GoogleFonts.nunito(fontSize: 14),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.logout),
+                    label: Text(
+                      'Logout',
+                      style: GoogleFonts.nunito(fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: _logout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 30,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Logged in as: ${_username ?? 'Loading...'}',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.nunito(
-                fontSize: 16,
-                color: AppColors.kSecondaryTextColor,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            const Spacer(flex: 2),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.info_outline),
-              label: const Text('Tentang Aplikasi'),
-              onPressed: _goToAboutScreen,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.logout),
-              label: const Text('Logout'),
-              onPressed: _logout,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-              ),
-            ),
-            const Spacer(flex: 1),
           ],
         ),
       ),

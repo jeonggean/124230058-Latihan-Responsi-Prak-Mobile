@@ -10,7 +10,7 @@ class AuthService {
     }
 
     if (_usersBox.containsKey(username)) {
-      throw Exception("Username sudah terpakai");
+      throw Exception("Username sudah digunakan");
     }
 
     await _usersBox.put(username, password);
@@ -22,29 +22,30 @@ class AuthService {
       throw Exception("Username tidak ditemukan");
     }
 
-    final String storedPassword = _usersBox.get(username);
+    final storedPassword = _usersBox.get(username);
 
-    if (password == storedPassword) {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("currentUser", username);
-      return true;
-    } else {
+    if (password != storedPassword) {
       throw Exception("Password salah");
     }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("currentUser", username);
+
+    return true;
   }
 
   Future<void> logout() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.remove("currentUser");
   }
 
   Future<String?> getCurrentUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     return prefs.getString("currentUser");
   }
 
   Future<bool> isLoggedIn() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey("currentUser");
   }
 }

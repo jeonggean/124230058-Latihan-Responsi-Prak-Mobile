@@ -1,12 +1,12 @@
-import 'package:eventfinder/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/anime_controller.dart';
 import '../models/anime_model.dart';
-import 'anime_detail_screen.dart'; 
+import '../../../core/utils/app_colors.dart';
+import 'anime_detail_screen.dart';
 
 class AnimeListScreen extends StatefulWidget {
-  AnimeListScreen({super.key});
+  const AnimeListScreen({super.key});
 
   @override
   State<AnimeListScreen> createState() => _AnimeListScreenState();
@@ -39,28 +39,28 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildCustomAppBar(),
+            _buildHeader(),
             _buildSearchBar(),
-            Expanded(
-              child: _buildAnimeList(_controller.animesToShow),
-            ),
+            Expanded(child: _buildAnimeList(_controller.animesToShow)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCustomAppBar() {
+  Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 8.0),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          
           Column(
+            
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Halo, User!', //belum diganti
+                'Halo, User!',
                 style: GoogleFonts.nunito(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -68,7 +68,7 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
                 ),
               ),
               Text(
-                'Temukan anime favoritmu', 
+                'Temukan anime favoritmu',
                 style: GoogleFonts.nunito(
                   fontSize: 16,
                   color: AppColors.kSecondaryTextColor,
@@ -78,10 +78,8 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
           ),
           CircleAvatar(
             backgroundColor: Theme.of(context).cardColor,
-            child: Icon(
-              Icons.person_outline,
-              color: AppColors.kSecondaryTextColor,
-            ),
+            child: Icon(Icons.notifications_outlined,
+                color: AppColors.kSecondaryTextColor),
           ),
         ],
       ),
@@ -90,7 +88,7 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: TextField(
         controller: _searchController,
         style: TextStyle(color: AppColors.kTextColor),
@@ -110,60 +108,55 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
           filled: true,
           fillColor: Theme.of(context).cardColor,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15.0),
+            borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
           ),
-          contentPadding: const EdgeInsets.symmetric(vertical: 16.0),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
-        onChanged: (value) => setState(() {}),
-        onSubmitted: (String keyword) {
-          _controller.searchAnime(keyword);
+        onSubmitted: (text) {
+          if (text.isEmpty) {
+            _controller.fetchTopAnime();
+          } else {
+            _controller.searchAnime(text);
+          }
         },
       ),
     );
   }
 
-  Widget _buildAnimeList(List<AnimeModel> animes) {
+  Widget _buildAnimeList(List<AnimeModel> list) {
     if (_controller.isLoading) {
       return Center(
-          child: CircularProgressIndicator(
-              color: Theme.of(context).colorScheme.primary));
-    }
-
-    if (_controller.errorMessage.isNotEmpty && animes.isEmpty) {
-      String displayError = _controller.errorMessage.contains('Gagal memuat data')
-          ? 'Gagal mengambil data dari server. Cek koneksi internetmu.'
-          : 'Terjadi kesalahan.';
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Text(
-            displayError,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.red.shade700, fontSize: 16),
-          ),
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.primary,
         ),
       );
     }
 
-    if (animes.isEmpty) {
-      String message = _searchController.text.isNotEmpty
-          ? 'Tidak ada anime ditemukan untuk "${_searchController.text}".'
-          : 'Tidak ada anime ditemukan.';
+    if (_controller.errorMessage.isNotEmpty && list.isEmpty) {
       return Center(
-          child: Text(message,
-              style:
-                  TextStyle(color: AppColors.kSecondaryTextColor, fontSize: 16),
-              textAlign: TextAlign.center));
+        child: Text(
+          "Gagal memuat data.",
+          style: TextStyle(color: Colors.red.shade700, fontSize: 16),
+        ),
+      );
+    }
+
+    if (list.isEmpty) {
+      return Center(
+        child: Text(
+          "Tidak ada anime ditemukan.",
+          style: TextStyle(color: AppColors.kSecondaryTextColor, fontSize: 16),
+        ),
+      );
     }
 
     return ListView.separated(
-      key: PageStorageKey('anime_list'),
-      padding: const EdgeInsets.all(24.0),
-      itemCount: animes.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
+      padding: const EdgeInsets.all(24),
+      itemCount: list.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final AnimeModel anime = animes[index];
+        final anime = list[index];
         return _buildAnimeCard(anime);
       },
     );
@@ -175,35 +168,25 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AnimeDetailScreen(anime: anime),
+            builder: (_) => AnimeDetailScreen(anime: anime),
           ),
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
+              borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                anime.imageUrl, // Data dari model anime
+                anime.imageUrl,
                 height: 80,
                 width: 80,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  height: 80,
-                  width: 80,
-                  color: AppColors.kBackgroundColor,
-                  child: const Icon(
-                    Icons.broken_image,
-                    size: 40,
-                    color: AppColors.kSecondaryTextColor,
-                  ),
-                ),
               ),
             ),
             const SizedBox(width: 16),
@@ -212,7 +195,7 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    anime.title, // Data dari model anime [cite: 853]
+                    anime.title,
                     style: GoogleFonts.nunito(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
@@ -227,7 +210,7 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
                       Icon(Icons.star, size: 14, color: Colors.amber),
                       const SizedBox(width: 6),
                       Text(
-                        "Score: ${anime.score.toString()}",
+                        "Score: ${anime.score}",
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.kSecondaryTextColor,

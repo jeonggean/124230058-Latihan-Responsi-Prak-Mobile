@@ -15,74 +15,86 @@ class AnimeDetailScreen extends StatefulWidget {
 
 class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
   final FavoritesService _favoritesService = FavoritesService();
-  late bool _isFavorite = false;
+  late Future<bool> _favoriteFuture;
 
   @override
   void initState() {
     super.initState();
-    _checkFavoriteStatus();
-  }
-
-  void _checkFavoriteStatus() async {
-    _isFavorite = await _favoritesService.isFavorite(widget.anime);
-    if (mounted) setState(() {});
-  }
-
-  void _toggleFavorite() async {
-    if (_isFavorite) {
-      await _favoritesService.removeFavorite(widget.anime);
-    } else {
-      await _favoritesService.addFavorite(widget.anime);
-    }
-    if (mounted) setState(() => _isFavorite = !_isFavorite);
+    _favoriteFuture = _favoritesService.isFavorite(widget.anime);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          _buildPurpleHeader(),
-          Expanded(child: _buildContent()),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(child: _buildContent()),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPurpleHeader() {
+  Widget _buildHeader() {
     return Container(
-      width: double.infinity,
-      height: 240,
-      decoration: BoxDecoration(
-        color: Colors.purple.shade400,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
+      height: 160,
+      decoration: const BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(40),
+          bottomRight: Radius.circular(40),
         ),
       ),
       child: SafeArea(
+        bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                  onPressed: () => Navigator.pop(context),
+              IconButton(
+                icon: const Icon(Icons.arrow_back, size: 26),
+                color: Colors.white,
+                onPressed: () => Navigator.pop(context),
+              ),
+              Expanded(
+                child: Text(
+                  widget.anime.title,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.nunito(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              CircleAvatar(
-                backgroundColor: Colors.white,
-                child: IconButton(
-                  icon: Icon(
-                    _isFavorite ? Icons.bookmark : Icons.bookmark_border,
-                    color: Colors.purple.shade500,
-                  ),
-                  onPressed: _toggleFavorite,
-                ),
+              FutureBuilder<bool>(
+                future: _favoriteFuture,
+                builder: (context, snapshot) {
+                  final isFavorite = snapshot.data ?? false;
+                  return IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      size: 26,
+                    ),
+                    color: Colors.white,
+                    onPressed: () async {
+                      if (isFavorite) {
+                        await _favoritesService.removeFavorite(widget.anime);
+                      } else {
+                        await _favoritesService.addFavorite(widget.anime);
+                      }
+                      setState(() {
+                        _favoriteFuture = _favoritesService.isFavorite(
+                          widget.anime,
+                        );
+                      });
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -93,34 +105,34 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
 
   Widget _buildContent() {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Transform.translate(
-            offset: const Offset(0, -80),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                widget.anime.imageUrl,
-                height: 250,
-                width: 180,
-                fit: BoxFit.cover,
-              ),
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              widget.anime.imageUrl,
+              height: 260,
+              width: 180,
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: -40),
+          const SizedBox(height: 20),
           Text(
             widget.anime.title,
             textAlign: TextAlign.center,
             style: GoogleFonts.nunito(
-              fontSize: 26,
+              fontSize: 27,
               fontWeight: FontWeight.bold,
               color: AppColors.kTextColor,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            "⭐ ${widget.anime.score}",
+            "Score • ${widget.anime.score}",
             style: GoogleFonts.nunito(
               fontSize: 17,
               color: Colors.grey.shade700,
@@ -152,7 +164,7 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
               color: Colors.grey.shade800,
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 50),
         ],
       ),
     );

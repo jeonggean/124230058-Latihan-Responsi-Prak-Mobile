@@ -45,20 +45,22 @@ class MyApp extends StatelessWidget {
         ),
         textTheme: GoogleFonts.nunitoTextTheme(ThemeData.light().textTheme)
             .apply(
-          bodyColor: AppColors.kTextColor,
-          displayColor: AppColors.kTextColor,
-        ),
+              bodyColor: AppColors.kTextColor,
+              displayColor: AppColors.kTextColor,
+            ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.kPrimaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              textStyle: GoogleFonts.nunito(
-                  fontWeight: FontWeight.bold, fontSize: 16)),
+            backgroundColor: AppColors.kPrimaryColor,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            textStyle: GoogleFonts.nunito(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
         ),
         cardTheme: CardThemeData(
           clipBehavior: Clip.antiAlias,
@@ -113,9 +115,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-            child: CircularProgressIndicator(
-      color: AppColors.kPrimaryColor,
-    )));
+      body: Center(
+        child: CircularProgressIndicator(color: AppColors.kPrimaryColor),
+      ),
+    );
   }
 }

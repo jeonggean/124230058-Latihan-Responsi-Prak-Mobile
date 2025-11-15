@@ -15,9 +15,9 @@ class AnimeModel {
 
   factory AnimeModel.fromJson(Map<String, dynamic> json) {
     return AnimeModel(
-      malId: json['mal_id'] ?? 0,
+      malId: json['mal_id'] ?? json['malId'] ?? 0,
       title: json['title'] ?? "-",
-      imageUrl: json['images']['jpg']['image_url'] ?? "",
+      imageUrl: json['images']?['jpg']?['image_url'] ?? json['image_url'] ?? "",
       score: (json['score'] ?? 0).toDouble(),
       synopsis: json['synopsis'] ?? "-",
     );
@@ -25,7 +25,7 @@ class AnimeModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'mal_id': malId,
+      'malId': malId,
       'title': title,
       'image_url': imageUrl,
       'score': score,

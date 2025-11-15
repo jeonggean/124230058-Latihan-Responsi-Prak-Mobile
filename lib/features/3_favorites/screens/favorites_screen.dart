@@ -1,6 +1,7 @@
-import 'package:eventfinder/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:eventfinder/core/utils/app_colors.dart'; // Sesuaikan path
+
 import '../../1_animes/models/anime_model.dart';
 import '../../1_animes/screens/anime_detail_screen.dart';
 import '../controllers/favorites_controller.dart';
@@ -19,27 +20,52 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   void initState() {
     super.initState();
     _controller = FavoritesController();
-    _controller.addListener(() {
-      if (mounted) setState(() {});
-    });
+    _controller.addListener(_onStateChanged);
+    _loadData();
+  }
 
-    _controller.loadFavorites();
+  void _onStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onStateChanged);
     _controller.dispose();
     super.dispose();
   }
+
+  Future<void> _loadData() async {
+    await _controller.loadFavorites();
+  }
+
+  void _navigateToDetail(AnimeModel anime) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AnimeDetailScreen(anime: anime),
+      ),
+    ).then((_) {
+      // PENTING: Muat ulang data saat kembali dari detail
+      _loadData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Favorit Saya',
+          style: GoogleFonts.nunito(fontWeight: FontWeight.bold),
         ),
       ),
-      body: _buildBody(),
+      body: RefreshIndicator(
+        onRefresh: _loadData,
+        child: _buildBody(),
+      ),
     );
   }
 
@@ -53,36 +79,30 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     if (_controller.favorites.isEmpty) {
       return Center(
         child: Text(
-          'Kamu belum punya acara favorit.',
+          'Belum ada anime favorit.',
           style: GoogleFonts.nunito(
-              fontSize: 16, color: AppColors.kSecondaryTextColor),
+            fontSize: 16,
+            color: AppColors.kSecondaryTextColor,
+          ),
         ),
       );
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(16.0),
       itemCount: _controller.favorites.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final AnimeModel event = _controller.favorites[index];
-        return _buildEventCard(event);
+        final anime = _controller.favorites[index];
+        return _buildAnimeCard(anime);
       },
     );
   }
 
-  Widget _buildEventCard(AnimeModel anime) {
+  Widget _buildAnimeCard(AnimeModel anime) {
+    // Card ini saya samakan dengan di anime_list_screen
     return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AnimeDetailScreen(anime: anime),
-          ),
-        ).then((_) {
-          _controller.loadFavorites();
-        });
-      },
+      onTap: () => _navigateToDetail(anime),
       child: Container(
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
@@ -91,21 +111,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         ),
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
-                anime.imageUrl,
-                height: 80,
-                width: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
+            Hero(
+              tag: 'anime-poster-${anime.malId}',
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: Image.network(
+                  anime.imageUrl,
                   height: 80,
                   width: 80,
-                  color: AppColors.kBackgroundColor,
-                  child: const Icon(
-                    Icons.broken_image,
-                    size: 40,
-                    color: AppColors.kSecondaryTextColor,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 80,
+                    width: 80,
+                    color: AppColors.kBackgroundColor,
+                    child: const Icon(
+                      Icons.broken_image,
+                      size: 40,
+                      color: AppColors.kSecondaryTextColor,
+                    ),
                   ),
                 ),
               ),
@@ -124,6 +147,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.star, size: 14, color: Colors.amber),
+                      const SizedBox(width: 6),
+                      Text(
+                        "Score: ${anime.score.toString()}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.kSecondaryTextColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
