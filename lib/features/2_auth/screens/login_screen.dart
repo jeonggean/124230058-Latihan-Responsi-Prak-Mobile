@@ -66,13 +66,13 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Icon(
-                  Icons.music_note,
+                  Icons.lock,
                   size: 80,
                   color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'EventFinder',
+                  'Login',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.nunito(
                     fontSize: 32,
@@ -80,15 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Temukan konsermu selanjutnya',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.nunito(
-                    fontSize: 16,
-                    color: Theme.of(context).iconTheme.color,
-                  ),
-                ),
-                const SizedBox(height: 48),
                 TextField(
                   controller: _usernameController,
                   decoration: InputDecoration(

@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.2.1
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.0.0
+  
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +60,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets: 
+    - assets/sylvanian-4.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
