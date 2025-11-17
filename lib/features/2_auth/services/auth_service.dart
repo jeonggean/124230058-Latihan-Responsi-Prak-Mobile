@@ -1,8 +1,9 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/auth_model.dart';
 
 class AuthService {
-  final Box _usersBox = Hive.box('users');
+  final Box<User> _usersBox = Hive.box<User>('userBox');
 
   Future<bool> register(String username, String password) async {
     if (username.isEmpty || password.isEmpty) {
@@ -13,18 +14,20 @@ class AuthService {
       throw Exception("Username sudah digunakan");
     }
 
-    await _usersBox.put(username, password);
+    final user = User(username: username, password: password);
+    await _usersBox.put(username, user);
+
     return true;
   }
 
   Future<bool> login(String username, String password) async {
-    if (!_usersBox.containsKey(username)) {
+    final user = _usersBox.get(username);
+
+    if (user == null) {
       throw Exception("Username tidak ditemukan");
     }
 
-    final storedPassword = _usersBox.get(username);
-
-    if (password != storedPassword) {
+    if (password != user.password) {
       throw Exception("Password salah");
     }
 

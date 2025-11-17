@@ -220,27 +220,10 @@ class _AnimeListScreenState extends State<AnimeListScreen> {
 
   Widget _buildAnimeGrid(List<AnimeModel> list) {
     if (_controller.isLoading) {
-      return SliverToBoxAdapter(
-        child: Container(
-          height: 300,
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade400),
-                strokeWidth: 2,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Memuat anime...',
-                style: GoogleFonts.nunito(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
+      return Container(
+        height: 280,
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.kPrimaryColor),
         ),
       );
     }

@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'features/2_auth/models/auth_model.dart';
 import 'features/0_navigation/main_navigation_screen.dart';
 import 'features/2_auth/services/auth_service.dart';
 import 'features/2_auth/screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final appDocumentDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocumentDir.path);
-  await Hive.openBox('users');
+
+  Hive.registerAdapter(UserAdapter());
+
+  await Hive.openBox('users'); // Box lama (bisa dihapus nanti)
+  await Hive.openBox<User>('userBox');
   runApp(const MyApp());
 }
 
